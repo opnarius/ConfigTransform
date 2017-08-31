@@ -11,10 +11,10 @@ namespace TransformerCli
     public class Options
     {
 
-        [Option('b', "base", HelpText = "Base config file path")]
+        [Option('b', "base", Required = true, HelpText = "Base config file path")]
         public string BaseConfig { get; set; }
 
-        [Option('t', "transform", HelpText = "Transform file path")]
+        [Option('t', "transform", Required = true, HelpText = "Transform file path")]
         public string TransformConfig { get; set; }
 
         [HelpOption]

@@ -33,7 +33,8 @@ namespace TransformerCli
             CopyFile(transformFileInfo, myTransformPath);
 
             var diffCommand = ConfigurationManager.AppSettings["diffCommand"];
-            var diffCommandArgs = ConfigurationManager.AppSettings["diffCommandArgs"];
+            var diffCommandArgs = ConfigurationManager.AppSettings["diffCommand:Args"];
+            var diffCommandWait = bool.Parse(ConfigurationManager.AppSettings["diffCommand:Wait"]);
 
             var transformer = new TransformXml
             {
@@ -52,7 +53,14 @@ namespace TransformerCli
                 processInfo.Arguments = diffCommandArgs.Replace("${Source}", myBasePath.FullName)
                     .Replace("${Result}", myResultPath.FullName);
 
+                Console.WriteLine($"\"{processInfo.FileName}\" {processInfo.Arguments}");
+
                 var process = Process.Start(processInfo);
+
+                if (diffCommandWait)
+                {
+                    process?.WaitForExit();
+                }
             }
 
             if (Debugger.IsAttached)
@@ -60,7 +68,6 @@ namespace TransformerCli
                 Console.WriteLine("Press any key to exit...");
                 Console.ReadKey();
             }
-
         }
 
         static void CopyFile(FileInfo sourceInfo, FileInfo destinationInfo)
