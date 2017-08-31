@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace TransformerCli
             var baseFileInfo = new FileInfo(options.BaseConfig);
             var transformFileInfo = new FileInfo(options.TransformConfig);
 
-            var myBasePath = new FileInfo($".\\workspace/{baseFileInfo.Name}");
+            var myBasePath = new FileInfo($".\\workspace\\{baseFileInfo.Name}");
             var myTransformPath = new FileInfo($".\\workspace\\{transformFileInfo.Name}");
             var myResultPath = new FileInfo($".\\workspace\\{baseFileInfo.Name.Replace(baseFileInfo.Extension, "")}_Result{baseFileInfo.Extension}");
 
@@ -31,9 +32,8 @@ namespace TransformerCli
             CopyFile(baseFileInfo, myBasePath);
             CopyFile(transformFileInfo, myTransformPath);
 
-            var diffCommandSetting = ConfigurationManager.AppSettings["diffCommand"];
-
-            var cunt = new FileInfo(diffCommandSetting);
+            var diffCommand = ConfigurationManager.AppSettings["diffCommand"];
+            var diffCommandArgs = ConfigurationManager.AppSettings["diffCommandArgs"];
 
             var transformer = new TransformXml
             {
@@ -48,13 +48,14 @@ namespace TransformerCli
 
             if (transformationSucceeded)
             {
-                //var diffCommand = diffCommandSetting.Replace("${Source}", myBasePath.FullName)
-                //    .Replace("${Result}", myResultPath.FullName);
+                var processInfo = new ProcessStartInfo(diffCommand);
+                processInfo.Arguments = diffCommandArgs.Replace("${Source}", myBasePath.FullName)
+                    .Replace("${Result}", myResultPath.FullName);
 
-                //System.Diagnostics.Process.Start(diffCommand);
+                var process = Process.Start(processInfo);
             }
 
-            if (System.Diagnostics.Debugger.IsAttached)
+            if (Debugger.IsAttached)
             {
                 Console.WriteLine("Press any key to exit...");
                 Console.ReadKey();
